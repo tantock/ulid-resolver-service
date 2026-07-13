@@ -29,12 +29,12 @@ type service struct {
 }
 
 var (
-	database   = os.Getenv("BLUEPRINT_DB_DATABASE")
-	password   = os.Getenv("BLUEPRINT_DB_PASSWORD")
-	username   = os.Getenv("BLUEPRINT_DB_USERNAME")
-	port       = os.Getenv("BLUEPRINT_DB_PORT")
-	host       = os.Getenv("BLUEPRINT_DB_HOST")
-	schema     = os.Getenv("BLUEPRINT_DB_SCHEMA")
+	database   = os.Getenv("SERVICE_DB_DATABASE")
+	password   = os.Getenv("SERVICE_DB_PASSWORD")
+	username   = os.Getenv("SERVICE_DB_USERNAME")
+	port       = os.Getenv("SERVICE_DB_PORT")
+	host       = os.Getenv("SERVICE_DB_HOST")
+	schema     = os.Getenv("SERVICE_DB_SCHEMA")
 	dbInstance *service
 )
 
