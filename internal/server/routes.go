@@ -1,13 +1,16 @@
 package server
 
 import (
-	"encoding/json"
-	"log"
+	"context"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/tantock/ulid-resolver-service/internal/dto"
+
+	"github.com/danielgtaylor/huma/v2"
+	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -22,26 +25,39 @@ func (s *Server) RegisterRoutes() http.Handler {
 		MaxAge:           300,
 	}))
 
-	r.Get("/", s.HelloWorldHandler)
+	v1 := chi.NewRouter()
 
-	r.Get("/health", s.healthHandler)
+	api := humachi.New(v1, huma.DefaultConfig("ULID Resolver API", "0.0.0"))
 
+	huma.Get(api, "/", s.HelloWorldHandler)
+
+	huma.Get(api, "/health", s.healthHandler)
+
+	r.Mount("/v1", v1)
 	return r
 }
 
-func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
-	resp := make(map[string]string)
-	resp["message"] = "Hello World"
-
-	jsonResp, err := json.Marshal(resp)
-	if err != nil {
-		log.Fatalf("error handling JSON marshal. Err: %v", err)
-	}
-
-	_, _ = w.Write(jsonResp)
+func (s *Server) HelloWorldHandler(ctx context.Context, input *dto.EmptyInput) (*dto.HelloWorldOutput, error) {
+	resp := &dto.HelloWorldOutput{Body: dto.HelloWorldOutputBody{Message: "Hello World"}}
+	return resp, nil
 }
 
-func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
-	jsonResp, _ := json.Marshal(s.db.Health())
-	_, _ = w.Write(jsonResp)
+func (s *Server) healthHandler(ctx context.Context, input *dto.EmptyInput) (*dto.DatabaseHealthOutput, error) {
+	health := s.db.Health()
+
+	resp := &dto.DatabaseHealthOutput{
+		Body: dto.DatabaseHealthOutputBody{
+			Status:            health["status"],
+			Message:           health["message"],
+			Error:             health["error"],
+			OpenConnections:   health["open_connections"],
+			InUse:             health["in_use"],
+			Idle:              health["idle"],
+			WaitCount:         health["wait_count"],
+			WaitDuration:      health["wait_duration"],
+			MaxIdleClosed:     health["max_idle_closed"],
+			MaxLifetimeClosed: health["max_lifetime_closed"],
+		},
+	}
+	return resp, nil
 }

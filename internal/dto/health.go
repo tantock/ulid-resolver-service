@@ -1,6 +1,10 @@
 package dto
 
 type DatabaseHealthOutput struct {
+	Body DatabaseHealthOutputBody
+}
+
+type DatabaseHealthOutputBody struct {
 	Status            string `json:"status" example:"up" doc:"Database Health Status"`
 	Message           string `json:"message" example:"It's healthy" doc:"Database Status Message"`
 	Error             string `json:"error" example:"db down: ..." doc:"Database Error Message"`
