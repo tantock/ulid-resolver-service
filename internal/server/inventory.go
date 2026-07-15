@@ -19,7 +19,10 @@ func (s *Server) upcToULIDHandler(ctx context.Context, input *dto.InventoryUpcIn
 	} else {
 		ULID := ulid.Make()
 		ulidStr = ULID.String()
-		s.db.InsertUpc(inventory.UpcUlidPair{UPC: input.Body.UPC, ULID: ULID})
+		err = s.db.InsertUpc(inventory.UpcUlidPair{UPC: input.Body.UPC, ULID: ULID})
+		if err != nil {
+			return nil, err
+		}
 	}
 	resp := &dto.InventoryUlidOutput{
 		Body: dto.InventoryUlidOutputBody{ULID: ulidStr},
