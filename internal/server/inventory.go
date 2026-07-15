@@ -10,10 +10,10 @@ import (
 )
 
 func (s *Server) upcToULIDHandler(ctx context.Context, input *dto.InventoryUpcInput) (*dto.InventoryUlidOutput, error) {
-	if input.Body.UPC == "" {
+	if input.UPC == "" {
 		return nil, fmt.Errorf("Empty UPC input")
 	}
-	selectedUlid, err := s.db.SelectUlidFromUpc(input.Body.UPC)
+	selectedUlid, err := s.db.SelectUlidFromUpc(input.UPC)
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +23,7 @@ func (s *Server) upcToULIDHandler(ctx context.Context, input *dto.InventoryUpcIn
 	} else {
 		ULID := ulid.Make()
 		ulidStr = ULID.String()
-		err = s.db.InsertUpc(inventory.UpcUlidPair{UPC: input.Body.UPC, ULID: ULID})
+		err = s.db.InsertUpc(inventory.UpcUlidPair{UPC: input.UPC, ULID: ULID})
 		if err != nil {
 			return nil, err
 		}
