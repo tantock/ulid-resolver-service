@@ -5,7 +5,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/humatest"
 )
 
@@ -13,7 +12,7 @@ func TestHelloWorldHandler(t *testing.T) {
 	_, api := humatest.New(t)
 	s := &Server{}
 
-	huma.Get(api, "/", s.HelloWorldHandler)
+	s.RegisterRoutes(api)
 
 	resp := api.Get("/")
 
