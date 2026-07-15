@@ -5,7 +5,7 @@ type InventoryUpcInput struct {
 }
 
 type InventoryUpcInputBody struct {
-	UPC string `json:"upc" example:"8801052435022" doc:"Universal Product Code"`
+	UPC string `path:"upc" maxLength:"12" example:"8801052435022" doc:"Universal Product Code"`
 }
 
 type InventoryUlidOutput struct {
