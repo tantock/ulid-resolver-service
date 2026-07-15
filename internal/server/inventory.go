@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/oklog/ulid/v2"
 	"github.com/tantock/ulid-resolver-service/internal/dto"
@@ -9,6 +10,9 @@ import (
 )
 
 func (s *Server) upcToULIDHandler(ctx context.Context, input *dto.InventoryUpcInput) (*dto.InventoryUlidOutput, error) {
+	if input.Body.UPC == "" {
+		return nil, fmt.Errorf("Empty UPC input")
+	}
 	selectedUlid, err := s.db.SelectUlidFromUpc(input.Body.UPC)
 	if err != nil {
 		return nil, err
