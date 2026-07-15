@@ -14,7 +14,7 @@ func (s *Server) RegisterRoutes(api huma.API) {
 
 	huma.Get(api, "/health", s.healthHandler)
 
-	huma.Get(api, "/inventory/ulid/upc/{upc}", s.upcToULIDHandler)
+	huma.Get(api, "/inventory/ulid/{id}", s.idToULIDHandler)
 }
 
 func (s *Server) HelloWorldHandler(ctx context.Context, input *dto.EmptyInput) (*dto.HelloWorldOutput, error) {

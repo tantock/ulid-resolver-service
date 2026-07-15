@@ -1,9 +1,5 @@
 package dto
 
-type InventoryUpcInput struct {
-	UPC string `path:"upc" maxLength:"12" example:"8801052435022" doc:"Universal Product Code"`
-}
-
 type InventoryUlidOutput struct {
 	Body InventoryUlidOutputBody
 }

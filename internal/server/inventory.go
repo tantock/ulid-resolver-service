@@ -9,21 +9,29 @@ import (
 	"github.com/tantock/ulid-resolver-service/internal/inventory"
 )
 
-func (s *Server) upcToULIDHandler(ctx context.Context, input *dto.InventoryUpcInput) (*dto.InventoryUlidOutput, error) {
-	if input.UPC == "" {
-		return nil, fmt.Errorf("Empty UPC input")
+func (s *Server) idToULIDHandler(ctx context.Context, input *dto.ProductIdInput) (*dto.InventoryUlidOutput, error) {
+	if input.Id == "" {
+		return nil, fmt.Errorf("Empty id input")
 	}
-	selectedUlid, err := s.db.SelectUlidFromUpc(input.UPC)
-	if err != nil {
-		return nil, err
+	var selectedUlid *inventory.InventoryUlid
+	var dbErr error
+	switch input.Type {
+	case "upc":
+		selectedUlid, dbErr = s.db.SelectUlidFromUpc(input.Id)
+		if dbErr != nil {
+			return nil, dbErr
+		}
+	default:
+		return nil, fmt.Errorf("unknown type specified: %v", input.Type)
 	}
+
 	var ulidStr = ""
 	if selectedUlid != nil {
 		ulidStr = selectedUlid.ULID
 	} else {
 		ULID := ulid.Make()
 		ulidStr = ULID.String()
-		err = s.db.InsertUpc(inventory.UpcUlidPair{UPC: input.UPC, ULID: ULID})
+		err := s.db.InsertUpc(inventory.UpcUlidPair{UPC: input.Id, ULID: ULID})
 		if err != nil {
 			return nil, err
 		}
