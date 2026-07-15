@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -11,6 +12,7 @@ import (
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/tantock/ulid-resolver-service/internal/inventory"
 )
 
 // Service represents a service that interacts with a database.
@@ -22,6 +24,10 @@ type Service interface {
 	// Close terminates the database connection.
 	// It returns an error if the connection cannot be closed.
 	Close() error
+
+	SelectUlidFromUpc(string) (*inventory.InventoryUlid, error)
+
+	InsertUpc(inventory.UpcUlidPair) error
 }
 
 type service struct {
@@ -112,4 +118,12 @@ func (s *service) Health() map[string]string {
 func (s *service) Close() error {
 	log.Printf("Disconnected from database: %s", database)
 	return s.db.Close()
+}
+
+func (s *service) SelectUlidFromUpc(string) (*inventory.InventoryUlid, error) {
+	return nil, errors.New("not implemented") //TODO Implement SelectUlidFromUpc
+}
+
+func (s *service) InsertUpc(inventory.UpcUlidPair) error {
+	return errors.New("not implemented") //TODO Implement InsertUpc
 }
