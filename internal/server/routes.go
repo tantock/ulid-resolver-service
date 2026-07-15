@@ -26,8 +26,14 @@ func (s *Server) RegisterRoutes() http.Handler {
 	}))
 
 	v1 := chi.NewRouter()
+	config := huma.DefaultConfig("ULID Resolver API", "0.0.0")
 
-	api := humachi.New(v1, huma.DefaultConfig("ULID Resolver API", "0.0.0"))
+	config.Servers = []*huma.Server{
+		{
+			URL: "/v1",
+		},
+	}
+	api := humachi.New(v1, config)
 
 	huma.Get(api, "/", s.HelloWorldHandler)
 
