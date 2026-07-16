@@ -10,3 +10,8 @@ WHERE pct.display_name = $1
 INSERT INTO product (id, product_code, product_code_type_id)
 VALUES ($1, $2, $3)
 RETURNING *;
+
+-- name: SelectProductCodeTypeByName :one
+SELECT *
+FROM product_code_type pct
+WHERE pct.display_name = $1;
