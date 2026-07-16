@@ -15,3 +15,8 @@ RETURNING *;
 SELECT *
 FROM product_code_type pct
 WHERE pct.display_name = $1;
+
+-- name: InsertProductCodeType :one
+INSERT INTO product_code_type (id, display_name)
+VALUES ($1, $2)
+RETURNING *;
