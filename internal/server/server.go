@@ -64,6 +64,7 @@ func NewServer() humacli.CLI {
 
 		hooks.OnStop(func() {
 			// Stop accepting new requests.
+			fmt.Println("Closing database...")
 			_, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
 
@@ -72,6 +73,7 @@ func NewServer() humacli.CLI {
 			if err != nil {
 				log.Print(err)
 			}
+			fmt.Println("Database closed successfully.")
 		})
 	})
 	return cli
