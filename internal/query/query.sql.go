@@ -28,6 +28,37 @@ func (q *Queries) InsertProduct(ctx context.Context, arg InsertProductParams) (P
 	return i, err
 }
 
+const insertProductCodeType = `-- name: InsertProductCodeType :one
+INSERT INTO product_code_type (id, display_name)
+VALUES ($1, $2)
+RETURNING id, display_name
+`
+
+type InsertProductCodeTypeParams struct {
+	ID          int32
+	DisplayName string
+}
+
+func (q *Queries) InsertProductCodeType(ctx context.Context, arg InsertProductCodeTypeParams) (ProductCodeType, error) {
+	row := q.db.QueryRowContext(ctx, insertProductCodeType, arg.ID, arg.DisplayName)
+	var i ProductCodeType
+	err := row.Scan(&i.ID, &i.DisplayName)
+	return i, err
+}
+
+const selectProductCodeTypeByName = `-- name: SelectProductCodeTypeByName :one
+SELECT id, display_name
+FROM product_code_type pct
+WHERE pct.display_name = $1
+`
+
+func (q *Queries) SelectProductCodeTypeByName(ctx context.Context, displayName string) (ProductCodeType, error) {
+	row := q.db.QueryRowContext(ctx, selectProductCodeTypeByName, displayName)
+	var i ProductCodeType
+	err := row.Scan(&i.ID, &i.DisplayName)
+	return i, err
+}
+
 const selectUlidFromId = `-- name: SelectUlidFromId :one
 SELECT p.id, p.product_code, p.product_code_type_id
 FROM product_code_type pct
