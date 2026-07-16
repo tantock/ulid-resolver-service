@@ -8,12 +8,18 @@ import (
 type Product interface {
 	Id() string
 	IdType() dto.IdType
+	Ulid() ulid.ULID
 }
 
 type product struct {
 	id     string
 	idType dto.IdType
 	ulid   ulid.ULID
+}
+
+// Ulid implements [Product].
+func (p *product) Ulid() ulid.ULID {
+	return p.ulid
 }
 
 // Id implements [Product].
