@@ -12,7 +12,9 @@ import (
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/tantock/ulid-resolver-service/internal/dto"
 	"github.com/tantock/ulid-resolver-service/internal/inventory"
+	"github.com/tantock/ulid-resolver-service/internal/query"
 )
 
 // Service represents a service that interacts with a database.
@@ -31,7 +33,8 @@ type Service interface {
 }
 
 type service struct {
-	db *sql.DB
+	db          *sql.DB
+	sqlcAdapter *query.Queries
 }
 
 var (
@@ -55,7 +58,8 @@ func New() Service {
 		log.Fatal(err)
 	}
 	dbInstance = &service{
-		db: db,
+		db:          db,
+		sqlcAdapter: query.New(db),
 	}
 	return dbInstance
 }
@@ -120,8 +124,18 @@ func (s *service) Close() error {
 	return s.db.Close()
 }
 
-func (s *service) SelectUlidFromUpc(string) (*inventory.InventoryUlid, error) {
-	return nil, errors.New("not implemented") //TODO Implement SelectUlidFromUpc
+func (s *service) SelectUlidFromUpc(upc string) (*inventory.InventoryUlid, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+	row, err := s.sqlcAdapter.SelectUlidFromId(ctx, query.SelectUlidFromIdParams{DisplayName: string(dto.IdUpc), ProductCode: upc})
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	inventoryUlid := inventory.InventoryUlid{ULID: row.ID}
+	return &inventoryUlid, nil
 }
 
 func (s *service) InsertUpc(inventory.UpcUlidPair) error {
