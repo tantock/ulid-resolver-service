@@ -9,6 +9,22 @@ import (
 	"context"
 )
 
+const insertProduct = `-- name: InsertProduct :exec
+INSERT INTO product (id, product_code, product_code_type_id)
+VALUES ($1, $2, $3)
+`
+
+type InsertProductParams struct {
+	ID                string
+	ProductCode       string
+	ProductCodeTypeID int32
+}
+
+func (q *Queries) InsertProduct(ctx context.Context, arg InsertProductParams) error {
+	_, err := q.db.ExecContext(ctx, insertProduct, arg.ID, arg.ProductCode, arg.ProductCodeTypeID)
+	return err
+}
+
 const selectUlidFromId = `-- name: SelectUlidFromId :one
 SELECT p.id, p.product_code, p.product_code_type_id
 FROM product_code_type pct
