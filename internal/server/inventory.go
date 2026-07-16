@@ -29,9 +29,8 @@ func (s *Server) idToULIDHandler(ctx context.Context, input *dto.ProductIdInput)
 	if selectedUlid != nil {
 		ulidStr = selectedUlid.ULID
 	} else {
-		ULID := ulid.Make()
-		ulidStr = ULID.String()
-		err := s.db.InsertUpc(inventory.UpcUlidPair{UPC: input.Id, ULID: ULID})
+		upcProduct := inventory.NewUpcProduct(input.Id, ulid.Make())
+		err := s.db.InsertProduct(upcProduct)
 		if err != nil {
 			return nil, err
 		}
