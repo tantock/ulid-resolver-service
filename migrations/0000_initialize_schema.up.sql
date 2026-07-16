@@ -14,3 +14,6 @@ CREATE TABLE product (
     CONSTRAINT product_product_code_unique
         UNIQUE (product_code)
 );
+
+CREATE INDEX idx_product_product_code_type_id
+ON product(product_code_type_id);
