@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -12,7 +11,9 @@ import (
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/tantock/ulid-resolver-service/internal/dto"
 	"github.com/tantock/ulid-resolver-service/internal/inventory"
+	"github.com/tantock/ulid-resolver-service/internal/query"
 )
 
 // Service represents a service that interacts with a database.
@@ -27,11 +28,12 @@ type Service interface {
 
 	SelectUlidFromUpc(string) (*inventory.InventoryUlid, error)
 
-	InsertUpc(inventory.UpcUlidPair) error
+	InsertProduct(product inventory.Product) error
 }
 
 type service struct {
-	db *sql.DB
+	db          *sql.DB
+	sqlcAdapter *query.Queries
 }
 
 var (
@@ -55,7 +57,8 @@ func New() Service {
 		log.Fatal(err)
 	}
 	dbInstance = &service{
-		db: db,
+		db:          db,
+		sqlcAdapter: query.New(db),
 	}
 	return dbInstance
 }
@@ -120,10 +123,33 @@ func (s *service) Close() error {
 	return s.db.Close()
 }
 
-func (s *service) SelectUlidFromUpc(string) (*inventory.InventoryUlid, error) {
-	return nil, errors.New("not implemented") //TODO Implement SelectUlidFromUpc
+func (s *service) SelectUlidFromUpc(upc string) (*inventory.InventoryUlid, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+	row, err := s.sqlcAdapter.SelectUlidFromId(ctx, query.SelectUlidFromIdParams{DisplayName: string(dto.IdUpc), ProductCode: upc})
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	inventoryUlid := inventory.InventoryUlid{ULID: row.ID}
+	return &inventoryUlid, nil
 }
 
-func (s *service) InsertUpc(inventory.UpcUlidPair) error {
-	return errors.New("not implemented") //TODO Implement InsertUpc
+func (s *service) InsertProduct(product inventory.Product) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+	row, err := s.sqlcAdapter.SelectProductCodeTypeByName(ctx, string(product.IdType()))
+	if err == sql.ErrNoRows {
+		row, err = s.sqlcAdapter.InsertProductCodeType(ctx, string(product.IdType()))
+		if err != nil {
+			return err
+		}
+	}
+	_, productErr := s.sqlcAdapter.InsertProduct(ctx, query.InsertProductParams{ID: product.Ulid().String(), ProductCode: product.Id(), ProductCodeTypeID: row.ID})
+	if productErr != nil {
+		return productErr
+	}
+	return nil
 }
