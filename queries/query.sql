@@ -5,3 +5,7 @@ JOIN product p
     ON pct.id = p.product_code_type_id
 WHERE pct.display_name = $1 
     AND p.product_code = $2;
+
+-- name: InsertProduct :exec
+INSERT INTO product (id, product_code, product_code_type_id)
+VALUES ($1, $2, $3);
