@@ -9,9 +9,10 @@ import (
 	"context"
 )
 
-const insertProduct = `-- name: InsertProduct :exec
+const insertProduct = `-- name: InsertProduct :one
 INSERT INTO product (id, product_code, product_code_type_id)
 VALUES ($1, $2, $3)
+RETURNING id, product_code, product_code_type_id
 `
 
 type InsertProductParams struct {
@@ -20,9 +21,11 @@ type InsertProductParams struct {
 	ProductCodeTypeID int32
 }
 
-func (q *Queries) InsertProduct(ctx context.Context, arg InsertProductParams) error {
-	_, err := q.db.ExecContext(ctx, insertProduct, arg.ID, arg.ProductCode, arg.ProductCodeTypeID)
-	return err
+func (q *Queries) InsertProduct(ctx context.Context, arg InsertProductParams) (Product, error) {
+	row := q.db.QueryRowContext(ctx, insertProduct, arg.ID, arg.ProductCode, arg.ProductCodeTypeID)
+	var i Product
+	err := row.Scan(&i.ID, &i.ProductCode, &i.ProductCodeTypeID)
+	return i, err
 }
 
 const selectUlidFromId = `-- name: SelectUlidFromId :one
