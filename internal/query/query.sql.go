@@ -29,18 +29,13 @@ func (q *Queries) InsertProduct(ctx context.Context, arg InsertProductParams) (P
 }
 
 const insertProductCodeType = `-- name: InsertProductCodeType :one
-INSERT INTO product_code_type (id, display_name)
-VALUES ($1, $2)
+INSERT INTO product_code_type (display_name)
+VALUES ($1)
 RETURNING id, display_name
 `
 
-type InsertProductCodeTypeParams struct {
-	ID          int32
-	DisplayName string
-}
-
-func (q *Queries) InsertProductCodeType(ctx context.Context, arg InsertProductCodeTypeParams) (ProductCodeType, error) {
-	row := q.db.QueryRowContext(ctx, insertProductCodeType, arg.ID, arg.DisplayName)
+func (q *Queries) InsertProductCodeType(ctx context.Context, displayName string) (ProductCodeType, error) {
+	row := q.db.QueryRowContext(ctx, insertProductCodeType, displayName)
 	var i ProductCodeType
 	err := row.Scan(&i.ID, &i.DisplayName)
 	return i, err
