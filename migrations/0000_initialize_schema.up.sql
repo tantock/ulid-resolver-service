@@ -1,5 +1,5 @@
 CREATE TABLE product_code_type(
-    id int GENERATED ALWAYS AS IDENTITY PRIMARY KEY
+    id int GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     display_name TEXT NOT NULL,
     CONSTRAINT product_code_type_display_name_unique
         UNIQUE (display_name)
