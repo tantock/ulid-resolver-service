@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -28,8 +27,6 @@ type Service interface {
 	Close() error
 
 	SelectUlidFromUpc(string) (*inventory.InventoryUlid, error)
-
-	InsertUpc(inventory.UpcUlidPair) error
 
 	InsertProduct(product inventory.Product) error
 }
@@ -138,10 +135,6 @@ func (s *service) SelectUlidFromUpc(upc string) (*inventory.InventoryUlid, error
 	}
 	inventoryUlid := inventory.InventoryUlid{ULID: row.ID}
 	return &inventoryUlid, nil
-}
-
-func (s *service) InsertUpc(inventory.UpcUlidPair) error {
-	return errors.New("not implemented") //TODO Implement InsertUpc
 }
 
 func (s *service) InsertProduct(product inventory.Product) error {
