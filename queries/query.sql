@@ -1,5 +1,5 @@
 -- name: SelectUlidFromId :one
-SELECT *
+SELECT p.*
 FROM product_code_type pct
 JOIN product p
     ON pct.id = p.product_code_type_id
