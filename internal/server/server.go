@@ -1,8 +1,11 @@
 package server
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"net/http"
+	"time"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
@@ -57,6 +60,18 @@ func NewServer() humacli.CLI {
 		hooks.OnStart(func() {
 			fmt.Printf("Starting server on port %d...\n", options.Port)
 			http.ListenAndServe(fmt.Sprintf(":%d", options.Port), r)
+		})
+
+		hooks.OnStop(func() {
+			// Stop accepting new requests.
+			_, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+
+			// Then close the database pool.
+			err := NewServer.db.Close()
+			if err != nil {
+				log.Print(err)
+			}
 		})
 	})
 	return cli
