@@ -30,6 +30,8 @@ type Service interface {
 	SelectUlidFromUpc(string) (*inventory.InventoryUlid, error)
 
 	InsertUpc(inventory.UpcUlidPair) error
+
+	InsertProduct(product inventory.Product) error
 }
 
 type service struct {
@@ -140,4 +142,21 @@ func (s *service) SelectUlidFromUpc(upc string) (*inventory.InventoryUlid, error
 
 func (s *service) InsertUpc(inventory.UpcUlidPair) error {
 	return errors.New("not implemented") //TODO Implement InsertUpc
+}
+
+func (s *service) InsertProduct(product inventory.Product) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+	row, err := s.sqlcAdapter.SelectProductCodeTypeByName(ctx, string(product.IdType()))
+	if err == sql.ErrNoRows {
+		row, err = s.sqlcAdapter.InsertProductCodeType(ctx, string(product.IdType()))
+		if err != nil {
+			return err
+		}
+	}
+	_, productErr := s.sqlcAdapter.InsertProduct(ctx, query.InsertProductParams{ID: product.Ulid().String(), ProductCode: product.Id(), ProductCodeTypeID: row.ID})
+	if productErr != nil {
+		return productErr
+	}
+	return nil
 }
