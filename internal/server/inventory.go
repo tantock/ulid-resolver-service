@@ -16,7 +16,7 @@ func (s *Server) idToULIDHandler(ctx context.Context, input *dto.ProductIdInput)
 	var selectedUlid *inventory.InventoryUlid
 	var dbErr error
 	switch input.Type {
-	case "upc":
+	case dto.IdUpc:
 		selectedUlid, dbErr = s.db.SelectUlidFromUpc(input.Id)
 		if dbErr != nil {
 			return nil, dbErr
